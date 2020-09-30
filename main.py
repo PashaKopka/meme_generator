@@ -11,15 +11,16 @@ except ImportError:
 
 class ImgMaker:
 
-    def __init__(self, input_img, text, font=cv2.FONT_HERSHEY_COMPLEX, text_color=(0, 0, 0)):
+    def __init__(self, input_img, text, font=cv2.FONT_HERSHEY_COMPLEX, text_color=(0, 0, 0), cordinates=(100, 72)):
         self.input_img = cv2.imread(input_img)
         self.text = text
         self.text_font = font
         self.text_color = text_color
         self.output_img = 'img.png'
+        self.cordinates = cordinates
 
     def make_img(self):
-        cv2.putText(self.input_img, self.text, (100, 72), self.text_font, 1, color=self.text_color, thickness=2)
+        cv2.putText(self.input_img, self.text, self.cordinates, self.text_font, 1, color=self.text_color, thickness=2)
         cv2.imwrite(self.output_img, self.input_img)
         return self.output_img
 
@@ -83,5 +84,6 @@ class TelegramUserBot:
             app.send_photo(message['chat']['username'], photo=link)
 
         app.run()
+
 
 TelegramUserBot('img.jpg')
