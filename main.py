@@ -1,6 +1,5 @@
 import cv2
 from pyrogram import Client, filters
-import test
 import os
 from imgurpython import ImgurClient
 
@@ -34,25 +33,21 @@ class ConfigParserFacade:
         self.config_parser = ConfigParser.SafeConfigParser()
         self.config_path = config_path
 
-    def get_config(self):
+    def prepare_config(self):
         self.config_parser.read(self.config_path)
+        return self.config_parser.items("imgur")
 
-        imgur = dict(self.config_parser.items("imgur"))
+    def get_config(self):
+        imgur = dict(self.prepare_config())
 
-        client_id = self.client_id or imgur.get("id")
-        client_secret = self.client_secret or imgur.get("secret")
-        refresh_token = self.refresh_token or imgur.get("refresh_token", "")
+        self.client_id = self.client_id or imgur.get("id")
+        self.client_secret = self.client_secret or imgur.get("secret")
+        self.refresh_token = self.refresh_token or imgur.get("refresh_token", "")
+        self.data = {"id": self.client_id, "secret": self.client_secret}
 
-        if not (client_id and client_secret):
-            raise (
-                "Cannot upload - could not find IMGUR_API_ID or "
-                "IMGUR_API_SECRET environment variables or config file"
-            )
-
-        data = {"id": client_id, "secret": client_secret}
-        if refresh_token:
-            data["refresh_token"] = refresh_token
-        return data
+        if self.refresh_token:
+            self.data["refresh_token"] = self.refresh_token
+        return self.data
 
 
 class UploaderImgToImgur:
@@ -64,14 +59,8 @@ class UploaderImgToImgur:
     def upload_img(self):
         config = self.config_parser.get_config()
         img = self.img_maker.make_img()
-        if "refresh_token" in config:
-            client = ImgurClient(config["id"], config["secret"], refresh_token=config["refresh_token"])
-            anon = False
-        else:
-            client = ImgurClient(config["id"], config["secret"])
-            anon = True
-
-        response = client.upload_from_path(img, anon=anon)
+        client = ImgurClient(config["id"], config["secret"])
+        response = client.upload_from_path(img, anon=True)
         return response["link"]
 
 
@@ -94,14 +83,5 @@ class TelegramUserBot:
             app.send_photo(message['chat']['username'], photo=link)
 
         app.run()
-
-# @app.on_message(filters.command("meme", prefixes=".") & filters.me)
-# def type(app, message):
-#     message.delete()
-#     text = message.text.split(".meme ", maxsplit=1)[1]
-#     test.make_img(text)
-#     link = upload_image('img.png')
-#     app.send_photo(message['chat']['username'], photo=link)
-
 
 TelegramUserBot('img.jpg')
