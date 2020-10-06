@@ -11,13 +11,13 @@ except ImportError:
 
 class ImgMaker:
 
-    def __init__(self, input_img, text, font=cv2.FONT_HERSHEY_COMPLEX, text_color=(0, 0, 0), cordinates=(100, 72)):
+    def __init__(self, input_img, text, font=cv2.FONT_HERSHEY_COMPLEX, text_color=(0, 0, 0), cordinates=None):
         self.input_img = cv2.imread(input_img)
         self.text = text
         self.text_font = font
         self.text_color = text_color
         self.output_img = 'img.png'
-        self.cordinates = cordinates
+        self.cordinates = cordinates if cordinates else (100, 72)
 
     def make_img(self):
         cv2.putText(self.input_img, self.text, self.cordinates, self.text_font, 1, color=self.text_color, thickness=2)
@@ -53,9 +53,9 @@ class ConfigParserFacade:
 
 class UploaderImgToImgur:
 
-    def __init__(self, input_img, text):
+    def __init__(self, input_img, text, cordinates):
         self.config_parser = ConfigParserFacade()
-        self.img_maker = ImgMaker(input_img, text)
+        self.img_maker = ImgMaker(input_img, text, cordinates=cordinates)
 
     def upload_img(self):
         config = self.config_parser.get_config()
@@ -65,20 +65,16 @@ class UploaderImgToImgur:
         return response["link"]
 
 
-upl = UploaderImgToImgur('img.jpg', 'test')
-print(upl.upload_img())
-
-
 class TelegramUserBot:
 
-    def __init__(self, input_img):
+    def __init__(self, input_img, cordinates=None):
         app = Client('my_user_bot')
 
         @app.on_message(filters.command("meme", prefixes=".") & filters.me)
         def send_img(app, message):
             message.delete()
             text = message.text.split(".meme ", maxsplit=1)[1]
-            img_uploader = UploaderImgToImgur(input_img, text)
+            img_uploader = UploaderImgToImgur(input_img, text, cordinates)
             link = img_uploader.upload_img()
 
             app.send_photo(message['chat']['username'], photo=link)
@@ -86,4 +82,4 @@ class TelegramUserBot:
         app.run()
 
 
-TelegramUserBot('img.jpg')
+TelegramUserBot('img.jpg', cordinates=(100, 72))
