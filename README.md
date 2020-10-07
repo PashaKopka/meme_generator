@@ -20,6 +20,10 @@ To get this data you must to login on this urls:
  - [telegram](https://my.telegram.org/auth)
  - [imgur](https://api.imgur.com/oauth2/addclient)
 
+Install requirenments.txt:
+```bash
+pip install -r requirenments.txt
+```
 Then put your img to directory with _main.py_
 ```python
 TelegramUserBot('img.jpg', cordinates=(100, 72))
