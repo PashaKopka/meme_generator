@@ -20,7 +20,7 @@ To get this data you must to login on this urls:
  - [telegram](https://my.telegram.org/auth)
  - [imgur](https://api.imgur.com/oauth2/addclient)
 
-Then put your img to directory with _main.py_\
+Then put your img to directory with _main.py_
 ```python
 TelegramUserBot('img.jpg', cordinates=(100, 72))
 ```
